@@ -39,50 +39,28 @@ const DOCTOR_POOL_ID = process.env.NEXT_PUBLIC_COGNITO_DOCTOR_POOL_ID;
 const DOCTOR_CLIENT_ID = process.env.NEXT_PUBLIC_COGNITO_DOCTOR_CLIENT_ID;
 
 function requirePatientClientId(): string {
-    if (!PATIENT_CLIENT_ID) {
-        throw new Error(
-            "COGNITO_NOT_CONFIGURED: NEXT_PUBLIC_COGNITO_PATIENT_CLIENT_ID is not set. " +
-            "Add it to your .env.local file."
-        );
-    }
-    return PATIENT_CLIENT_ID;
+    return PATIENT_CLIENT_ID || "demo_patient_client_id_ap_south_1";
 }
 
 function requireDoctorClientId(): string {
-    if (!DOCTOR_CLIENT_ID) {
-        throw new Error(
-            "COGNITO_NOT_CONFIGURED: NEXT_PUBLIC_COGNITO_DOCTOR_CLIENT_ID is not set. " +
-            "Add it to your .env.local file."
-        );
-    }
-    return DOCTOR_CLIENT_ID;
+    return DOCTOR_CLIENT_ID || "demo_doctor_client_id_ap_south_1";
 }
 
 function requirePatientPoolId(): string {
-    if (!PATIENT_POOL_ID) {
-        throw new Error(
-            "COGNITO_NOT_CONFIGURED: NEXT_PUBLIC_COGNITO_PATIENT_POOL_ID is not set. " +
-            "Add it to your .env.local file."
-        );
-    }
-    return PATIENT_POOL_ID;
+    return PATIENT_POOL_ID || "ap-south-1_demo_patient_pool";
 }
 
 function requireDoctorPoolId(): string {
-    if (!DOCTOR_POOL_ID) {
-        throw new Error(
-            "COGNITO_NOT_CONFIGURED: NEXT_PUBLIC_COGNITO_DOCTOR_POOL_ID is not set. " +
-            "Add it to your .env.local file."
-        );
-    }
-    return DOCTOR_POOL_ID;
+    return DOCTOR_POOL_ID || "ap-south-1_demo_doctor_pool";
 }
 
 export function isCognitoDemo(): boolean {
     return (
         !PATIENT_CLIENT_ID ||
         PATIENT_CLIENT_ID.includes("demo") ||
-        PATIENT_CLIENT_ID === "dummy"
+        PATIENT_CLIENT_ID === "dummy" ||
+        !PATIENT_POOL_ID ||
+        PATIENT_POOL_ID.includes("demo")
     );
 }
 

@@ -57,11 +57,11 @@ echo [INFO] Creating default .env.local configuration...
     echo APP_AWS_REGION=ap-south-1
     echo.
     echo # Cognito User Pools
-    echo NEXT_PUBLIC_COGNITO_PATIENT_POOL_ID=
-    echo NEXT_PUBLIC_COGNITO_PATIENT_CLIENT_ID=
-    echo NEXT_PUBLIC_COGNITO_DOCTOR_POOL_ID=
-    echo NEXT_PUBLIC_COGNITO_DOCTOR_CLIENT_ID=
-    echo NEXT_PUBLIC_COGNITO_CLIENT_ID=
+    echo NEXT_PUBLIC_COGNITO_PATIENT_POOL_ID=ap-south-1_demo_patient_pool
+    echo NEXT_PUBLIC_COGNITO_PATIENT_CLIENT_ID=demo_patient_client_id_ap_south_1
+    echo NEXT_PUBLIC_COGNITO_DOCTOR_POOL_ID=ap-south-1_demo_doctor_pool
+    echo NEXT_PUBLIC_COGNITO_DOCTOR_CLIENT_ID=demo_doctor_client_id_ap_south_1
+    echo NEXT_PUBLIC_COGNITO_CLIENT_ID=demo_patient_client_id_ap_south_1
     echo.
     echo # Storage
     echo NEXT_PUBLIC_S3_BUCKET=arogyasutra-medical-docs
