@@ -14,6 +14,7 @@ import {
     AdminUpdateUserAttributesCommand,
     AdminDeleteUserCommand,
     type InitiateAuthCommandOutput,
+    type AdminGetUserCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
 
 const region = process.env.NEXT_PUBLIC_AWS_REGION || process.env.APP_AWS_REGION || "ap-south-1";
@@ -77,12 +78,32 @@ function requireDoctorPoolId(): string {
     return DOCTOR_POOL_ID;
 }
 
+export function isCognitoDemo(): boolean {
+    return (
+        !PATIENT_CLIENT_ID ||
+        PATIENT_CLIENT_ID.includes("demo") ||
+        PATIENT_CLIENT_ID === "dummy"
+    );
+}
+
 // ---- Patient Auth ----
 
 /** Initiate SRP login for a patient by Card ID */
 export async function initiatePatientAuth(
     cardId: string
 ): Promise<InitiateAuthCommandOutput> {
+    if (isCognitoDemo()) {
+        return {
+            $metadata: {},
+            ChallengeName: "CUSTOM_CHALLENGE",
+            Session: `demo_session_${Date.now()}`,
+            ChallengeParameters: {
+                USERNAME: cardId,
+                maskedPhone: "+91 98*** **234",
+                devOtp: "482910",
+            },
+        };
+    }
     return cognitoClient.send(
         new InitiateAuthCommand({
             AuthFlow: "CUSTOM_AUTH",
@@ -101,6 +122,21 @@ export async function respondToChallenge(
     responses: Record<string, string>,
     pool: "patient" | "doctor" = "patient"
 ): Promise<InitiateAuthCommandOutput> {
+    if (isCognitoDemo()) {
+        return {
+            $metadata: {},
+            Session: `demo_session_${Date.now()}`,
+            ChallengeParameters: {
+                maskedPhone: "+91 98*** **234",
+                devOtp: "482910",
+            },
+            AuthenticationResult: {
+                AccessToken: `demo_access_${Date.now()}`,
+                IdToken: `demo_id_${Date.now()}`,
+                RefreshToken: `demo_refresh_${Date.now()}`,
+            },
+        };
+    }
     return cognitoClient.send(
         new RespondToAuthChallengeCommand({
             ClientId: pool === "patient" ? requirePatientClientId() : requireDoctorClientId(),
@@ -118,6 +154,9 @@ export async function registerPatient(
     dob: string,
     name: string
 ): Promise<void> {
+    if (isCognitoDemo()) {
+        return;
+    }
     await cognitoClient.send(
         new SignUpCommand({
             ClientId: requirePatientClientId(),
@@ -134,6 +173,30 @@ export async function registerPatient(
 
 /** Look up a patient by Card ID */
 export async function getPatientUser(cardId: string) {
+    if (isCognitoDemo()) {
+        return {
+            $metadata: {},
+            Username: cardId,
+            UserAttributes: [
+                { Name: "name", Value: cardId.includes("3391") ? "Aadhya Sharma" : "Rahul Sharma" },
+                { Name: "birthdate", Value: cardId.includes("3391") ? "2019-08-14" : "1981-06-12" },
+                { Name: "phone_number", Value: "+919820154321" },
+                { Name: "gender", Value: cardId.includes("3391") ? "female" : "male" },
+                { Name: "custom:blood_group", Value: "B+" },
+                { Name: "custom:height", Value: "175" },
+                { Name: "custom:weight", Value: "74" },
+                { Name: "custom:address_line1", Value: "Flat 402, Green Meadows" },
+                { Name: "custom:city", Value: "Mumbai" },
+                { Name: "custom:state", Value: "Maharashtra" },
+                { Name: "custom:pincode", Value: "400050" },
+                { Name: "custom:allergies", Value: "Sulfonamides" },
+                { Name: "custom:critical_meds", Value: "Metformin 500mg, Glimepiride 1mg, Amlodipine 5mg" },
+            ],
+            UserCreateDate: new Date("2024-01-15"),
+            UserLastModifiedDate: new Date("2026-09-08"),
+            Enabled: true,
+        } as unknown as AdminGetUserCommandOutput;
+    }
     return cognitoClient.send(
         new AdminGetUserCommand({
             UserPoolId: requirePatientPoolId(),

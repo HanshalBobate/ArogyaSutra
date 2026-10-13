@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
                 dynamodb.getEmergencyContacts(userId),
             ]);
             const attr = (name: string) =>
-                user.UserAttributes?.find((a) => a.Name === name)?.Value || "";
+                user.UserAttributes?.find((a: { Name?: string; Value?: string }) => a.Name === name)?.Value || "";
 
             const profile = {
                 patientId: userId,
