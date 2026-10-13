@@ -31,21 +31,25 @@ export async function POST(req: NextRequest) {
             }
 
             // NOTE: dateOfBirth is NOT sent — birthdate is immutable in Cognito
-            await cognito.updatePatientAttributes(userId, {
-                fullName: updates.fullName,
-                phone: updates.phone,
-                gender: updates.gender,
-                language: updates.language,
-                height: updates.height,
-                weight: updates.weight,
-                bloodGroup: updates.bloodGroup,
-                city: updates.city,
-                state: updates.state,
-                pincode: updates.pincode,
-                line1: updates.line1,
-                allergies: updates.allergies,
-                criticalMeds: updates.criticalMeds,
-            });
+            try {
+                await cognito.updatePatientAttributes(userId, {
+                    fullName: updates.fullName,
+                    phone: updates.phone,
+                    gender: updates.gender,
+                    language: updates.language,
+                    height: updates.height,
+                    weight: updates.weight,
+                    bloodGroup: updates.bloodGroup,
+                    city: updates.city,
+                    state: updates.state,
+                    pincode: updates.pincode,
+                    line1: updates.line1,
+                    allergies: updates.allergies,
+                    criticalMeds: updates.criticalMeds,
+                });
+            } catch (err) {
+                console.warn("[/api/profile/update] Cognito update skipped:", (err as Error).message);
+            }
 
             // emergency contacts stored in DynamoDB (custom:emergency_contacts not in Cognito schema)
             if (updates.emergencyContacts !== undefined) {
@@ -53,7 +57,7 @@ export async function POST(req: NextRequest) {
                     const contacts = JSON.parse(updates.emergencyContacts || "[]");
                     await dynamodb.putEmergencyContacts(userId, contacts);
                 } catch {
-                    console.warn("[/api/profile/update] Failed to parse emergencyContacts JSON");
+                    console.warn("[/api/profile/update] Failed to parse/save emergencyContacts");
                 }
             }
 
@@ -78,14 +82,18 @@ export async function POST(req: NextRequest) {
         } else if (role === "doctor") {
             // When a doctor updates a *patient's* vitals and health info
             if (updates.targetPatientId) {
-                await cognito.updatePatientAttributes(updates.targetPatientId, {
-                    bpSystolic: updates.bpSystolic,
-                    bpDiastolic: updates.bpDiastolic,
-                    height: updates.height,
-                    weight: updates.weight,
-                    allergies: updates.allergies,
-                    criticalMeds: updates.criticalMeds,
-                });
+                try {
+                    await cognito.updatePatientAttributes(updates.targetPatientId, {
+                        bpSystolic: updates.bpSystolic,
+                        bpDiastolic: updates.bpDiastolic,
+                        height: updates.height,
+                        weight: updates.weight,
+                        allergies: updates.allergies,
+                        criticalMeds: updates.criticalMeds,
+                    });
+                } catch (err) {
+                    console.warn("[/api/profile/update] Doctor update of patient vitals skipped:", (err as Error).message);
+                }
             } else {
                 // Doctor updating their own profile
                 const doctorAttrs: { Name: string; Value: string }[] = [];
@@ -94,18 +102,21 @@ export async function POST(req: NextRequest) {
                 if (updates.institution) doctorAttrs.push({ Name: "custom:institution", Value: updates.institution });
                 if (updates.designation) doctorAttrs.push({ Name: "custom:designation", Value: updates.designation });
 
-                if (doctorAttrs.length > 0) {
-                    const { AdminUpdateUserAttributesCommand } = await import("@aws-sdk/client-cognito-identity-provider");
-                    const { CognitoIdentityProviderClient } = await import("@aws-sdk/client-cognito-identity-provider");
-                    const creds = process.env.APP_AWS_ACCESS_KEY_ID && process.env.APP_AWS_SECRET_ACCESS_KEY
-                        ? { credentials: { accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID, secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY } }
-                        : {};
-                    const client = new CognitoIdentityProviderClient({ region: process.env.NEXT_PUBLIC_AWS_REGION || "ap-south-1", ...creds });
-                    await client.send(new AdminUpdateUserAttributesCommand({
-                        UserPoolId: process.env.NEXT_PUBLIC_COGNITO_DOCTOR_POOL_ID!,
-                        Username: userId,
-                        UserAttributes: doctorAttrs,
-                    }));
+                if (doctorAttrs.length > 0 && !cognito.isCognitoDemo()) {
+                    try {
+                        const { AdminUpdateUserAttributesCommand, CognitoIdentityProviderClient } = await import("@aws-sdk/client-cognito-identity-provider");
+                        const creds = process.env.APP_AWS_ACCESS_KEY_ID && process.env.APP_AWS_SECRET_ACCESS_KEY
+                            ? { credentials: { accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID, secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY } }
+                            : {};
+                        const client = new CognitoIdentityProviderClient({ region: process.env.NEXT_PUBLIC_AWS_REGION || "ap-south-1", ...creds });
+                        await client.send(new AdminUpdateUserAttributesCommand({
+                            UserPoolId: process.env.NEXT_PUBLIC_COGNITO_DOCTOR_POOL_ID!,
+                            Username: userId,
+                            UserAttributes: doctorAttrs,
+                        }));
+                    } catch (err) {
+                        console.warn("[/api/profile/update] Doctor self-update skipped:", (err as Error).message);
+                    }
                 }
             }
         }

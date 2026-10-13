@@ -225,13 +225,24 @@ export async function updatePatientAttributes(
     if (updates.criticalMeds !== undefined) attrs.push({ Name: "custom:critical_meds", Value: updates.criticalMeds });
     // emergencyContacts is stored in DynamoDB — not set in Cognito
 
-    if (attrs.length === 0) return;
+    if (attrs.length === 0 || isCognitoDemo()) return;
 
     await cognitoClient.send(
         new AdminUpdateUserAttributesCommand({
             UserPoolId: requirePatientPoolId(),
             Username: cardId,
             UserAttributes: attrs,
+        })
+    );
+}
+
+/** Delete a patient from Cognito User Pool */
+export async function deletePatientUser(cardId: string): Promise<void> {
+    if (isCognitoDemo()) return;
+    await cognitoClient.send(
+        new AdminDeleteUserCommand({
+            UserPoolId: requirePatientPoolId(),
+            Username: cardId,
         })
     );
 }
@@ -295,12 +306,3 @@ export async function initiateDoctorAuth(
     );
 }
 
-/** Permanently delete a patient from the user pool. */
-export async function deletePatientUser(userId: string): Promise<void> {
-    await cognitoClient.send(
-        new AdminDeleteUserCommand({
-            UserPoolId: requirePatientPoolId(),
-            Username: userId,
-        })
-    );
-}
