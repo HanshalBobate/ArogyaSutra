@@ -106,6 +106,7 @@ export async function GET(req: NextRequest) {
                 updatedAt: "2026-09-08T10:30:00Z",
                 confidenceScore: 0.96,
                 addedBy: "patient",
+                encryptedBlobKey: "/demo_data/patient_rahul/prescriptions/rahul_diabetes_prescription.jpg",
                 metadata: {
                     medications: [
                         { name: "Metformin", dosage: "500mg", frequency: "1-0-1 (BD)", route: "oral" },
@@ -129,6 +130,7 @@ export async function GET(req: NextRequest) {
                 updatedAt: "2026-09-06T09:00:00Z",
                 confidenceScore: 0.98,
                 addedBy: "patient",
+                encryptedBlobKey: "/demo_data/patient_rahul/lab_reports/rahul_hba1c_lipid_panel.jpg",
                 metadata: {
                     diagnoses: ["Suboptimal Glycemic Control", "Mixed Dyslipidemia"],
                     labTests: [
@@ -153,6 +155,7 @@ export async function GET(req: NextRequest) {
                 updatedAt: "2026-07-25T11:45:00Z",
                 confidenceScore: 0.95,
                 addedBy: "doctor",
+                encryptedBlobKey: "/demo_data/patient_rahul/prescriptions/rahul_cardiology_prescription.jpg",
                 metadata: {
                     medications: [
                         { name: "Telmisartan", dosage: "40mg", frequency: "0-0-1 (OD)", route: "oral" },
@@ -174,6 +177,7 @@ export async function GET(req: NextRequest) {
                 updatedAt: "2026-07-25T11:50:00Z",
                 confidenceScore: 0.94,
                 addedBy: "doctor",
+                encryptedBlobKey: "/demo_data/patient_rahul/imaging/Apollo Hospitals ECG Report.png",
                 metadata: {
                     diagnoses: ["Left Ventricular Hypertrophy with Strain Pattern (V5-V6)", "Left Axis Deviation"],
                 },
@@ -191,6 +195,7 @@ export async function GET(req: NextRequest) {
                 updatedAt: "2026-07-25T12:00:00Z",
                 confidenceScore: 0.92,
                 addedBy: "doctor",
+                encryptedBlobKey: "/demo_data/patient_rahul/imaging/Chest X-Ray and Radiology Report.png",
                 metadata: {
                     diagnoses: ["Borderline Cardiomegaly with LV Contour Prominence", "Lungs Clear Bilaterally"],
                 },
@@ -208,6 +213,7 @@ export async function GET(req: NextRequest) {
                 updatedAt: "2025-03-19T14:00:00Z",
                 confidenceScore: 0.97,
                 addedBy: "hospital",
+                encryptedBlobKey: "/demo_data/patient_rahul/discharge_summaries/Hospital Discharge Summary Pages.png",
                 metadata: {
                     diagnoses: ["Diabetic Ketoacidosis (Moderate)", "Type 2 Diabetes Mellitus (HbA1c 9.2%)", "UTI (E. coli)"],
                     allergies: ["SULFONAMIDES (Rash + Angioedema)"],
@@ -226,6 +232,7 @@ export async function GET(req: NextRequest) {
                 updatedAt: "2026-04-01T08:00:00Z",
                 confidenceScore: 0.99,
                 addedBy: "patient",
+                encryptedBlobKey: "/demo_data/patient_rahul/insurance/Star Health Insurance Policy Document.png",
                 metadata: {
                     policyNumber: "SHI/MUM/26/IND/9987234",
                     sumInsured: "₹12,50,000",

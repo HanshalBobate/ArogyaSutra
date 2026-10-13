@@ -30,8 +30,17 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Missing s3Key" }, { status: 400 });
     }
 
+    if (s3Key.startsWith("/") || s3Key.startsWith("http")) {
+        return NextResponse.json({ url: s3Key });
+    }
+
     if (!S3_BUCKET) {
-        return NextResponse.json({ error: "S3 bucket not configured" }, { status: 500 });
+        // Fallback to static demo data file
+        const cleanName = s3Key.split("/").pop() || "";
+        const fallbackUrl = cleanName
+            ? `/demo_data/patient_rahul/prescriptions/${cleanName}`
+            : "/demo_data/patient_rahul/prescriptions/rahul_diabetes_prescription.jpg";
+        return NextResponse.json({ url: fallbackUrl });
     }
 
     try {
@@ -42,7 +51,10 @@ export async function GET(req: NextRequest) {
         );
         return NextResponse.json({ url });
     } catch (err) {
-        console.error("[/api/timeline/document-url]", err);
-        return NextResponse.json({ error: "Failed to generate URL" }, { status: 500 });
+        console.warn("[/api/timeline/document-url] S3 presign failed, using demo fallback:", (err as Error).message);
+        const cleanName = s3Key.split("/").pop() || "";
+        return NextResponse.json({
+            url: `/demo_data/patient_rahul/prescriptions/${cleanName || "rahul_diabetes_prescription.jpg"}`
+        });
     }
 }
