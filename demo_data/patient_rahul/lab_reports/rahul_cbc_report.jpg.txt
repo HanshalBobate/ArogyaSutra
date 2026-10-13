@@ -1,0 +1,51 @@
+SYNTHETIC FILE: rahul_cbc_report.jpg
+================================================================
+INSTRUCTIONS TO CREATE THIS FILE:
+- Printed clinical pathology report from a hospital lab
+- Standard CBC format with values table
+
+CONTENT FOR THE LAB REPORT:
+================================================================
+
+SRL DIAGNOSTICS
+NABL Accredited
+Branch: Lower Parel, Mumbai - 400013
+
+COMPLETE BLOOD COUNT (CBC)
+
+Patient Name : Rahul Sharma
+Age / Sex    : 45 years / Male
+Ref. Doctor  : Dr. Priya Nair
+Sample ID    : SRL-2026-112893
+Sample Date  : 24-Jul-2026, 09:30 AM
+Report Date  : 24-Jul-2026
+
+─────────────────────────────────────────────────────────────
+TEST                    RESULT      UNIT       REFERENCE RANGE
+─────────────────────────────────────────────────────────────
+
+Hemoglobin             13.2        g/dL       13.0 – 17.0
+Total RBC Count         4.8        mill/cumm  4.5 – 5.5
+PCV / Hematocrit       41.2        %          40 – 50
+MCV                    85.8        fL         80 – 100
+MCH                    27.5        pg         27 – 31
+MCHC                   32.0        g/dL       32 – 36
+
+Total WBC Count         8,200      /cumm      4,000 – 11,000
+  Neutrophils          62          %          40 – 70
+  Lymphocytes          30          %          20 – 40
+  Monocytes             5          %          2 – 8
+  Eosinophils           2          %          1 – 6
+  Basophils             1          %          0 – 1
+
+Platelet Count         2,45,000    /cumm      1,50,000 – 4,00,000
+ESR (Westergren)       18          mm/hr      0 – 15
+
+─────────────────────────────────────────────────────────────
+
+Interpretation:
+- CBC within normal limits
+- ESR mildly elevated — correlate clinically
+
+Verified by: Dr. Meera Rao, MD (Pathology)
+================================================================

@@ -1,0 +1,369 @@
+/* ======================================================
+   ArogyaSutra Design System
+   Premium health-tech aesthetic: light mode, blue accent
+   ====================================================== */
+
+:root {
+  /* ---- Brand palette ---- */
+  --brand-navy: #0d1f3c;
+  /* primary dark — logo background */
+  --brand-navy-mid: #1a3258;
+  /* mid-dark navy for gradients */
+  --brand-navy-light: #e8eef8;
+  /* very light navy tint for backgrounds */
+  --brand-coral: #f06b6b;
+  /* primary accent — logo coral/red */
+  --brand-coral-light: #f8a5a5;
+  /* lighter coral for hover states */
+  --brand-coral-dark: #d94f4f;
+  /* deeper coral for active/pressed */
+  --brand-coral-glow: rgba(240, 107, 107, 0.18);
+  --brand-white: #ffffff;
+
+  /* ---- Color Palette (mapped from brand) ---- */
+  --color-bg-primary: #f0f4f8;
+  /* warm blue-gray page bg */
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #f7f9fc;
+  --color-bg-card: rgba(255, 255, 255, 0.92);
+  --color-bg-glass: rgba(255, 255, 255, 0.70);
+
+  --color-surface-hover: rgba(240, 107, 107, 0.07);
+  --color-surface-active: rgba(240, 107, 107, 0.13);
+
+  /* Accent = brand coral */
+  --color-accent: var(--brand-coral);
+  --color-accent-light: var(--brand-coral-light);
+  --color-accent-dark: var(--brand-coral-dark);
+  --color-accent-glow: var(--brand-coral-glow);
+
+  --color-text-primary: #1a202c;
+  --color-text-secondary: #4a5568;
+  --color-text-tertiary: #718096;
+  --color-text-inverse: #ffffff;
+
+  --color-border: rgba(13, 31, 60, 0.09);
+  --color-border-focus: rgba(240, 107, 107, 0.50);
+
+  --color-danger: #e53e3e;
+  --color-danger-dark: #c53030;
+  --color-danger-glow: rgba(229, 62, 62, 0.15);
+  --color-warning: #dd6b20;
+  --color-warning-glow: rgba(221, 107, 32, 0.15);
+  --color-success: #38a169;
+  --color-info: #3182ce;
+
+  /* Status flag colors */
+  --color-verified: #38a169;
+  --color-ai-read: #805ad5;
+  --color-critical: #e53e3e;
+
+  /* Document type tag colors */
+  --color-tag-rx: #3182ce;
+  --color-tag-lab: #805ad5;
+  --color-tag-hospital: #dd6b20;
+  --color-tag-consultation: #38a169;
+  --color-tag-vaccination: #0987a0;
+  --color-tag-imaging: #d53f8c;
+
+  /* ---- Typography ---- */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
+  --text-5xl: 3rem;
+  /* 48px */
+
+  --font-light: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+
+  /* ---- Spacing ---- */
+  --space-1: 0.25rem;
+  /* 4px */
+  --space-2: 0.5rem;
+  /* 8px */
+  --space-3: 0.75rem;
+  /* 12px */
+  --space-4: 1rem;
+  /* 16px */
+  --space-5: 1.25rem;
+  /* 20px */
+  --space-6: 1.5rem;
+  /* 24px */
+  --space-8: 2rem;
+  /* 32px */
+  --space-10: 2.5rem;
+  /* 40px */
+  --space-12: 3rem;
+  /* 48px */
+  --space-16: 4rem;
+  /* 64px */
+  --space-20: 5rem;
+  /* 80px */
+
+  /* ---- Border Radius ---- */
+  --radius-sm: 0.375rem;
+  /* 6px */
+  --radius-md: 0.5rem;
+  /* 8px */
+  --radius-lg: 0.75rem;
+  /* 12px */
+  --radius-xl: 1rem;
+  /* 16px */
+  --radius-2xl: 1.5rem;
+  /* 24px */
+  --radius-full: 9999px;
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 20px var(--color-accent-glow);
+  --shadow-glow-danger: 0 0 20px var(--color-danger-glow);
+
+  /* ---- Glassmorphism ---- */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-blur: 16px;
+
+  /* ---- Transitions ---- */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Z-Index ---- */
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-modal-backdrop: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-emergency: 500;
+}
+
+/* ---- Dark Mode overrides ---- */
+/*
+ * Deep navy palette — built around the brand-navy (#0d1f3c) family.
+ * Page is darker than the sidebar so cards visually "float" on the canvas.
+ * Coral accent is fully preserved.
+ */
+[data-theme="dark"] {
+  /* Backgrounds — deepest → lightest (all in the brand-navy family) */
+  --color-bg-primary:    #070e1a;   /* near-black navy — page canvas */
+  --color-bg-secondary:  #0d1b2e;   /* deep navy — card / panel surface */
+  --color-bg-tertiary:   #112338;   /* slightly lighter — secondary panels, inputs */
+  --color-bg-card:   rgba(13, 27, 46, 0.97);
+  --color-bg-glass:  rgba(13, 27, 46, 0.82);
+
+  /* Hover / active surfaces — coral tint kept */
+  --color-surface-hover:  rgba(240, 107, 107, 0.08);
+  --color-surface-active: rgba(240, 107, 107, 0.15);
+
+  /* Text — warm blue-white scale, easy on the eyes */
+  --color-text-primary:  #dde6f2;   /* bright enough, not stark white */
+  --color-text-secondary: #8aa3be;  /* medium blue-gray */
+  --color-text-tertiary:  #526a82;  /* muted / de-emphasised */
+  --color-text-inverse:   #07111f;
+
+  /* Borders — subtle blue tint instead of flat white */
+  --color-border:       rgba(100, 145, 195, 0.14);
+  --color-border-focus: rgba(240, 107, 107, 0.55);
+
+  /* Brand-light derivations — toned down for dark context */
+  --brand-navy-light:   #1a3258;
+
+  /* Glass morphism */
+  --glass-bg:     rgba(13, 27, 46, 0.76);
+  --glass-border: rgba(100, 145, 200, 0.12);
+
+  /* Deeper shadows for dark surfaces */
+  --shadow-sm: 0 1px 3px  rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.50), 0 2px 4px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 22px rgba(0, 0, 0, 0.55), 0 4px 8px  rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 20px 32px rgba(0, 0, 0, 0.60), 0 8px 12px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 22px rgba(240, 107, 107, 0.22);
+}
+
+/* ---- Base Reset & Defaults ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: var(--leading-normal);
+  min-height: 100dvh;
+}
+
+/* ---- Glassmorphism Card ---- */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  transition: border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.glass-card:hover {
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-glow);
+}
+
+.glass-card--danger {
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.glass-card--danger:hover {
+  box-shadow: var(--shadow-glow-danger);
+}
+
+/* ---- Status Badges ---- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.badge--verified {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-verified);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge--ai-read {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--color-ai-read);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.badge--critical {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-critical);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ---- Document Type Tags ---- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  font-family: var(--font-mono);
+}
+
+.tag--rx {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--color-tag-rx);
+}
+
+.tag--lab {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--color-tag-lab);
+}
+
+.tag--hospital {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--color-tag-hospital);
+}
+
+.tag--consultation {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-tag-consultation);
+}
+
+.tag--vaccination {
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--color-tag-vaccination);
+}
+
+.tag--imaging {
+  background: rgba(236, 72, 153, 0.15);
+  color: var(--color-tag-imaging);
+}
+
+/* ---- Utility Classes ---- */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

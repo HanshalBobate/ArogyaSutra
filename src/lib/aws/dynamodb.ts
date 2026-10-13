@@ -1,0 +1,459 @@
+// ============================================================
+// Amazon DynamoDB Integration
+// Audit logs, access grants, and session management
+// ============================================================
+
+import {
+    DynamoDBClient,
+} from "@aws-sdk/client-dynamodb";
+import {
+    DynamoDBDocumentClient,
+    PutCommand,
+    GetCommand,
+    QueryCommand,
+    DeleteCommand,
+    UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
+import type { AuditLogEntry, StoredAccessGrant, AuditLogQuery } from "../types/audit";
+import type { BreakGlassSession, BreakGlassLog } from "../types/emergency";
+import type { Appointment, UpdateAppointmentInput } from "../types/appointment";
+
+// Amplify blocks "AWS_" prefix env vars — use APP_AWS_* workaround.
+// Falls back to default credential chain (IAM role / local ~/.aws).
+const _appCreds =
+    process.env.APP_AWS_ACCESS_KEY_ID && process.env.APP_AWS_SECRET_ACCESS_KEY
+        ? { credentials: { accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID, secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY } }
+        : {};
+
+
+const region = process.env.NEXT_PUBLIC_AWS_REGION || "ap-south-1";
+const client = new DynamoDBClient({ region, ..._appCreds });
+const dynamodb = DynamoDBDocumentClient.from(client);
+
+const AUDIT_TABLE = process.env.DYNAMODB_AUDIT_TABLE || "arogyasutra-audit-logs";
+const ACCESS_TABLE = process.env.DYNAMODB_ACCESS_TABLE || "arogyasutra-access-grants";
+const SESSION_TABLE = process.env.DYNAMODB_SESSION_TABLE || "arogyasutra-sessions";
+const PREFS_TABLE = process.env.DYNAMODB_PREFS_TABLE || "arogyasutra-user-prefs";
+const APPT_TABLE = process.env.DYNAMODB_APPOINTMENTS_TABLE || "arogyasutra-appointments";
+const CHECKUP_TABLE = process.env.DYNAMODB_CHECKUP_TABLE || "arogyasutra-checkups";
+
+// ---- Audit Logs (Immutable — no update/delete) ----
+
+/** Write an audit log entry. Append-only, never modified. */
+export async function putAuditLog(entry: AuditLogEntry): Promise<void> {
+    await dynamodb.send(
+        new PutCommand({
+            TableName: AUDIT_TABLE,
+            Item: entry,
+            ConditionExpression: "attribute_not_exists(logId)", // Immutable
+        })
+    );
+}
+
+/** Query audit logs for a patient. */
+export async function queryAuditLogs(
+    query: AuditLogQuery
+): Promise<{ logs: AuditLogEntry[]; lastKey?: string }> {
+    const expressionValues: Record<string, unknown> = {
+        ":patientId": query.patientId,
+    };
+    const expressionNames: Record<string, string> = {};
+    let filterExpression = "";
+    const filterParts: string[] = [];
+
+    if (query.actions && query.actions.length > 0) {
+        const actionValues = query.actions.map((a, i) => {
+            expressionValues[`:action${i}`] = a;
+            return `:action${i}`;
+        });
+        expressionNames["#action"] = "action";
+        filterParts.push(`#action IN (${actionValues.join(", ")})`);
+    }
+
+    if (query.dateFrom) {
+        expressionValues[":dateFrom"] = query.dateFrom;
+        expressionNames["#ts"] = "timestamp";
+        filterParts.push("#ts >= :dateFrom");
+    }
+
+    if (query.dateTo) {
+        expressionValues[":dateTo"] = query.dateTo;
+        expressionNames["#ts"] = "timestamp";
+        filterParts.push("#ts <= :dateTo");
+    }
+
+    if (filterParts.length > 0) {
+        filterExpression = filterParts.join(" AND ");
+    }
+
+    const result = await dynamodb.send(
+        new QueryCommand({
+            TableName: AUDIT_TABLE,
+            KeyConditionExpression: "patientId = :patientId",
+            ExpressionAttributeValues: expressionValues,
+            ...(Object.keys(expressionNames).length > 0 && { ExpressionAttributeNames: expressionNames }),
+            ...(filterExpression && { FilterExpression: filterExpression }),
+            ScanIndexForward: false, // Newest first
+            Limit: query.limit || 50,
+            ...(query.lastEvaluatedKey && {
+                ExclusiveStartKey: JSON.parse(query.lastEvaluatedKey),
+            }),
+        })
+    );
+
+    return {
+        logs: (result.Items || []) as AuditLogEntry[],
+        lastKey: result.LastEvaluatedKey
+            ? JSON.stringify(result.LastEvaluatedKey)
+            : undefined,
+    };
+}
+
+// ---- Access Grants ----
+
+/** Store a doctor access grant. */
+export async function putAccessGrant(
+    grant: StoredAccessGrant
+): Promise<void> {
+    await dynamodb.send(
+        new PutCommand({
+            TableName: ACCESS_TABLE,
+            Item: grant,
+        })
+    );
+}
+
+/** Get an access grant by grant ID. */
+export async function getAccessGrant(
+    grantId: string
+): Promise<StoredAccessGrant | null> {
+    const result = await dynamodb.send(
+        new GetCommand({
+            TableName: ACCESS_TABLE,
+            Key: { grantId },
+        })
+    );
+    return (result.Item as StoredAccessGrant) || null;
+}
+
+/** List active grants for a patient. */
+export async function listPatientGrants(
+    patientId: string
+): Promise<StoredAccessGrant[]> {
+    const result = await dynamodb.send(
+        new QueryCommand({
+            TableName: ACCESS_TABLE,
+            IndexName: "patientId-index",
+            KeyConditionExpression: "patientId = :patientId",
+            FilterExpression: "isActive = :active",
+            ExpressionAttributeValues: {
+                ":patientId": patientId,
+                ":active": true,
+            },
+        })
+    );
+    return (result.Items || []) as StoredAccessGrant[];
+}
+
+/** List active grants for a doctor. */
+export async function listDoctorGrants(
+    doctorId: string
+): Promise<StoredAccessGrant[]> {
+    const result = await dynamodb.send(
+        new QueryCommand({
+            TableName: ACCESS_TABLE,
+            IndexName: "doctorId-index",
+            KeyConditionExpression: "doctorId = :doctorId",
+            FilterExpression: "isActive = :active",
+            ExpressionAttributeValues: {
+                ":doctorId": doctorId,
+                ":active": true,
+            },
+        })
+    );
+    return (result.Items || []) as StoredAccessGrant[];
+}
+
+/** Revoke an access grant. */
+export async function revokeAccessGrant(grantId: string): Promise<void> {
+    await dynamodb.send(
+        new UpdateCommand({
+            TableName: ACCESS_TABLE,
+            Key: { grantId },
+            UpdateExpression:
+                "SET isActive = :inactive, revokedAt = :now",
+            ExpressionAttributeValues: {
+                ":inactive": false,
+                ":now": new Date().toISOString(),
+            },
+        })
+    );
+}
+
+// ---- Break-Glass Sessions ----
+
+/** Store a Break-Glass session. */
+export async function putBreakGlassSession(
+    session: BreakGlassSession
+): Promise<void> {
+    await dynamodb.send(
+        new PutCommand({
+            TableName: SESSION_TABLE,
+            Item: { ...session, ttl: Math.floor(Date.parse(session.expiresAt) / 1000) },
+        })
+    );
+}
+
+/** Get an active Break-Glass session. */
+export async function getBreakGlassSession(
+    sessionId: string
+): Promise<BreakGlassSession | null> {
+    const result = await dynamodb.send(
+        new GetCommand({
+            TableName: SESSION_TABLE,
+            Key: { sessionId },
+        })
+    );
+    return (result.Item as BreakGlassSession) || null;
+}
+
+/** Expire a Break-Glass session. */
+export async function expireBreakGlassSession(
+    sessionId: string
+): Promise<void> {
+    await dynamodb.send(
+        new UpdateCommand({
+            TableName: SESSION_TABLE,
+            Key: { sessionId },
+            UpdateExpression: "SET isActive = :inactive",
+            ExpressionAttributeValues: { ":inactive": false },
+        })
+    );
+}
+
+// ---- User Preferences (notification read state, etc.) ----
+
+/** Get the list of read notification IDs for a user. */
+export async function getNotifReadIds(userId: string): Promise<number[]> {
+    const result = await dynamodb.send(
+        new GetCommand({
+            TableName: PREFS_TABLE,
+            Key: { userId, prefType: "notif_read" },
+        })
+    );
+    return (result.Item?.readIds as number[]) || [];
+}
+
+/** Persist the list of read notification IDs for a user. */
+export async function putNotifReadIds(userId: string, readIds: number[]): Promise<void> {
+    await dynamodb.send(
+        new PutCommand({
+            TableName: PREFS_TABLE,
+            Item: {
+                userId,
+                prefType: "notif_read",
+                readIds,
+                updatedAt: new Date().toISOString(),
+            },
+        })
+    );
+}
+
+/** Get emergency contacts for a user. Stored in PREFS_TABLE (custom:emergency_contacts is not in Cognito schema). */
+export async function getEmergencyContacts(userId: string): Promise<object[]> {
+    const result = await dynamodb.send(
+        new GetCommand({
+            TableName: PREFS_TABLE,
+            Key: { userId, prefType: "emergency_contacts" },
+        })
+    );
+    return (result.Item?.contacts as object[]) || [];
+}
+
+/** Persist emergency contacts for a user in PREFS_TABLE. */
+export async function putEmergencyContacts(userId: string, contacts: object[]): Promise<void> {
+    await dynamodb.send(
+        new PutCommand({
+            TableName: PREFS_TABLE,
+            Item: {
+                userId,
+                prefType: "emergency_contacts",
+                contacts,
+                updatedAt: new Date().toISOString(),
+            },
+        })
+    );
+}
+
+// ---- Emergency Info (allergies, meds, visibility) ----
+
+export interface EmergencyInfo {
+    allergies: string[];
+    criticalMeds: string[];
+    showBloodGroup: boolean;
+    showAllergies: boolean;
+    showMeds: boolean;
+    showContacts: boolean;
+    updatedAt: string;
+}
+
+/** Get emergency info (allergies, meds, visibility toggles) from PREFS_TABLE. */
+export async function getEmergencyInfo(userId: string): Promise<EmergencyInfo | null> {
+    const result = await dynamodb.send(
+        new GetCommand({
+            TableName: PREFS_TABLE,
+            Key: { userId, prefType: "emergency_info" },
+        })
+    );
+    if (!result.Item) return null;
+    return {
+        allergies: (result.Item.allergies as string[]) || [],
+        criticalMeds: (result.Item.criticalMeds as string[]) || [],
+        showBloodGroup: result.Item.showBloodGroup !== false,
+        showAllergies: result.Item.showAllergies !== false,
+        showMeds: result.Item.showMeds !== false,
+        showContacts: result.Item.showContacts !== false,
+        updatedAt: (result.Item.updatedAt as string) || "",
+    };
+}
+
+/** Persist emergency info (allergies, meds, visibility toggles) to PREFS_TABLE. */
+export async function putEmergencyInfo(userId: string, info: Partial<EmergencyInfo>): Promise<void> {
+    // Merge with existing to avoid clobbering fields not included in the update
+    const existing = await getEmergencyInfo(userId);
+    await dynamodb.send(
+        new PutCommand({
+            TableName: PREFS_TABLE,
+            Item: {
+                userId,
+                prefType: "emergency_info",
+                allergies: info.allergies ?? existing?.allergies ?? [],
+                criticalMeds: info.criticalMeds ?? existing?.criticalMeds ?? [],
+                showBloodGroup: info.showBloodGroup ?? existing?.showBloodGroup ?? true,
+                showAllergies: info.showAllergies ?? existing?.showAllergies ?? true,
+                showMeds: info.showMeds ?? existing?.showMeds ?? true,
+                showContacts: info.showContacts ?? existing?.showContacts ?? true,
+                updatedAt: new Date().toISOString(),
+            },
+        })
+    );
+}
+
+/** Store a Break-Glass audit log. */
+export async function putBreakGlassLog(log: BreakGlassLog): Promise<void> {
+    await dynamodb.send(
+        new PutCommand({
+            TableName: AUDIT_TABLE,
+            Item: { ...log, action: "BREAKGLASS_INITIATE" },
+            ConditionExpression: "attribute_not_exists(logId)",
+        })
+    );
+}
+
+// ---- Appointments ----
+
+/** List all appointments for a patient, ordered by date ascending. */
+export async function listAppointments(patientId: string): Promise<Appointment[]> {
+    const result = await dynamodb.send(
+        new QueryCommand({
+            TableName: APPT_TABLE,
+            IndexName: "by-date",
+            KeyConditionExpression: "patientId = :pid",
+            ExpressionAttributeValues: { ":pid": patientId },
+            ScanIndexForward: true, // oldest → newest by appointmentDate
+        })
+    );
+    return (result.Items || []) as Appointment[];
+}
+
+/** Create or overwrite an appointment. */
+export async function putAppointment(appt: Appointment): Promise<void> {
+    await dynamodb.send(
+        new PutCommand({
+            TableName: APPT_TABLE,
+            Item: appt,
+        })
+    );
+}
+
+/** Partially update an appointment (status, time, notes, etc.). */
+export async function updateAppointment(
+    patientId: string,
+    appointmentId: string,
+    updates: UpdateAppointmentInput
+): Promise<void> {
+    const now = new Date().toISOString();
+    const fields = { ...updates, updatedAt: now };
+    const setClauses = Object.keys(fields)
+        .map((k) => `#${k} = :${k}`)
+        .join(", ");
+    const expressionAttributeNames = Object.fromEntries(
+        Object.keys(fields).map((k) => [`#${k}`, k])
+    );
+    const expressionAttributeValues = Object.fromEntries(
+        Object.entries(fields).map(([k, v]) => [`:${k}`, v])
+    );
+
+    await dynamodb.send(
+        new UpdateCommand({
+            TableName: APPT_TABLE,
+            Key: { patientId, appointmentId },
+            UpdateExpression: `SET ${setClauses}`,
+            ExpressionAttributeNames: expressionAttributeNames,
+            ExpressionAttributeValues: expressionAttributeValues,
+        })
+    );
+}
+
+/** Delete an appointment. */
+export async function deleteAppointment(
+    patientId: string,
+    appointmentId: string
+): Promise<void> {
+    await dynamodb.send(
+        new DeleteCommand({
+            TableName: APPT_TABLE,
+            Key: { patientId, appointmentId },
+        })
+    );
+}
+
+// ---- Checkup History ----
+
+export interface CheckupEntry {
+    patientId: string;
+    checkupId: string;        // ISO timestamp used as sort key
+    bpSystolic: number;
+    bpDiastolic: number;
+    height?: string;
+    weight?: string;
+    recordedBy: string;       // doctor ID / name
+    recordedAt: string;       // ISO timestamp
+}
+
+/** Store a new checkup reading. */
+export async function putCheckup(entry: CheckupEntry): Promise<void> {
+    await dynamodb.send(
+        new PutCommand({
+            TableName: CHECKUP_TABLE,
+            Item: entry,
+        })
+    );
+}
+
+/** Fetch the last N checkup readings for a patient (newest first). */
+export async function getCheckupHistory(
+    patientId: string,
+    limit = 12
+): Promise<CheckupEntry[]> {
+    const result = await dynamodb.send(
+        new QueryCommand({
+            TableName: CHECKUP_TABLE,
+            KeyConditionExpression: "patientId = :pid",
+            ExpressionAttributeValues: { ":pid": patientId },
+            ScanIndexForward: false,   // newest first
+            Limit: limit,
+        })
+    );
+    return (result.Items || []) as CheckupEntry[];
+}

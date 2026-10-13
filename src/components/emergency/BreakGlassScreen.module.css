@@ -1,0 +1,768 @@
+/* ============================================================
+   Break-Glass Emergency Access Screen
+   ============================================================ */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--color-bg-primary);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    height: 56px;
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.headerLogo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-shrink: 0;
+    overflow: hidden;
+    height: 44px;
+}
+
+.headerBrandName {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.headerDivider {
+    width: 1px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.14);
+    flex-shrink: 0;
+}
+
+.headerBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    background: rgba(220, 38, 38, 0.18);
+    border: 1px solid rgba(220, 38, 38, 0.42);
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: #f87171;
+    text-transform: uppercase;
+}
+
+.headerBadgeDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ef4444;
+    animation: pulseDot 1.4s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.35; transform: scale(0.75); }
+}
+
+.headerSpacer { flex: 1; }
+
+.closeBtn {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.6);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+}
+
+.closeBtn:hover {
+    background: rgba(220, 38, 38, 0.3);
+    color: #fff;
+    border-color: rgba(220, 38, 38, 0.5);
+}
+
+/* Body */
+.body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px;
+    background: var(--color-bg-primary);
+}
+
+.panel {
+    width: 100%;
+    max-width: 600px;
+    background: var(--color-bg-secondary);
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+}
+
+/* Panel brand — logo at top of credentials card, matching login screen */
+.panelBrand {
+    display: flex;
+    justify-content: center;
+    padding: 20px 20px 0;
+    border-bottom: 1px solid var(--color-border);
+    background: linear-gradient(160deg, rgba(220,38,38,0.04) 0%, transparent 60%);
+}
+
+/* Panel hero (credentials step) */
+.panelHero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 26px 24px 18px;
+    background: linear-gradient(160deg, rgba(220,38,38,0.07) 0%, transparent 65%);
+    border-bottom: 1px solid var(--color-border);
+    text-align: center;
+}
+
+.panelHeroTitle {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.panelHeroSub {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.5;
+    max-width: 360px;
+}
+
+/* Warning banner */
+.warningBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 14px 18px 0;
+    padding: 11px 13px;
+    background: rgba(220, 38, 38, 0.07);
+    border: 1px solid rgba(220, 38, 38, 0.22);
+    border-radius: 9px;
+}
+
+.warningIcon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.warningBanner strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ef4444;
+    margin-bottom: 2px;
+}
+
+.warningBanner p {
+    font-size: 12px;
+    color: #dc2626;
+    margin: 0;
+    line-height: 1.4;
+    opacity: 0.88;
+}
+
+/* Form */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    padding: 16px 18px 20px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px;
+}
+
+@media (max-width: 460px) {
+    .row { grid-template-columns: 1fr; }
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.input,
+.textarea {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 9px;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    background: var(--color-bg-tertiary);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.input:focus,
+.textarea:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+/* ---- Card ID prefix wrapper ---- */
+.cardInputWrap {
+    display: flex;
+    align-items: stretch;
+    border: 1.5px solid var(--color-border);
+    border-radius: 9px;
+    background: var(--color-bg-tertiary);
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.cardInputWrap:focus-within {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+.cardPrefix {
+    display: flex;
+    align-items: center;
+    padding: 10px 8px 10px 13px;
+    font-size: 14px;
+    font-family: monospace;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-secondary);
+    border-right: 1px solid var(--color-border);
+    user-select: none;
+    flex-shrink: 0;
+}
+.cardSuffixInput {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 13px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 14px;
+    font-family: monospace;
+    outline: none;
+}
+.cardSuffixInput::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.textarea {
+    resize: vertical;
+}
+
+.geoNotice {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    padding: 9px 13px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+.accessBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+    letter-spacing: 0.01em;
+    margin-top: 2px;
+}
+
+.accessBtn:hover:not(:disabled) {
+    opacity: 0.9;
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.45);
+}
+
+.accessBtn:active:not(:disabled) {
+    transform: scale(0.99);
+}
+
+.accessBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Error box */
+.errorBox {
+    margin: 12px 18px 0;
+    padding: 11px 13px;
+    background: rgba(220, 38, 38, 0.10);
+    border: 1px solid rgba(220, 38, 38, 0.30);
+    border-radius: 9px;
+    font-size: 13px;
+    color: #ef4444;
+    line-height: 1.4;
+}
+
+/* ---- Data view ---- */
+
+/* Timer strip */
+.timerStrip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: rgba(22, 163, 74, 0.10);
+    border-bottom: 1px solid rgba(22, 163, 74, 0.25);
+}
+
+.timerUrgent {
+    background: rgba(220, 38, 38, 0.10);
+    border-bottom-color: rgba(220, 38, 38, 0.30);
+}
+
+.timerLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: #22c55e;
+    flex: 1;
+}
+
+.timerUrgent .timerLabel {
+    color: #dc2626;
+}
+
+.timerValue {
+    font-size: 14px;
+    font-weight: 700;
+    color: #4ade80;
+    font-variant-numeric: tabular-nums;
+}
+
+.timerUrgent .timerValue {
+    color: #f87171;
+}
+
+.endBtn {
+    padding: 6px 14px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.endBtn:hover {
+    background: var(--color-bg-secondary);
+}
+
+/* Progress bar */
+.timerBar {
+    height: 4px;
+    background: var(--color-border);
+    overflow: hidden;
+}
+
+.timerFill {
+    height: 100%;
+    background: #22c55e;
+    transition: width 1s linear;
+}
+
+.timerFillUrgent {
+    background: #dc2626;
+}
+
+/* Patient info header block (data view) */
+.patientHeader {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.patientAvatarLg {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+    letter-spacing: -0.02em;
+}
+
+.patientHeaderInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.patientName {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.patientNameText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+.patientIdPill {
+    font-size: 11px;
+    font-family: monospace;
+    color: var(--color-text-tertiary);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: 100px;
+    padding: 2px 8px;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+}
+
+.patientMeta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.patientMetaTag {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+}
+
+/* Data section headings */
+.dataTitle {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-tertiary);
+    margin: 0;
+    padding: 14px 20px 6px;
+}
+
+.dataSubtitle {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    margin: 0;
+    padding: 0 20px 10px;
+}
+
+.lastUpdated {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0 20px 14px;
+    padding: 10px 13px;
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.45;
+}
+
+.lastUpdatedStale {
+    background: color-mix(in srgb, #f59e0b 12%, transparent);
+    border-color: color-mix(in srgb, #f59e0b 35%, transparent);
+    color: var(--color-text-primary);
+}
+
+.lastUpdatedIcon {
+    flex-shrink: 0;
+    font-size: 15px;
+    margin-top: 1px;
+}
+
+.staleWarning {
+    color: #b45309;
+    font-weight: 600;
+}
+
+/* Data grid */
+.dataGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 4px 20px 16px;
+}
+
+@media (max-width: 460px) {
+    .dataGrid { grid-template-columns: 1fr; }
+}
+
+.dataCard {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 16px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+}
+
+.dataCardBlood {
+    grid-column: 1;
+}
+
+.dataCardAllergy {
+    grid-column: 2;
+}
+
+.dataCardIcon {
+    font-size: 22px;
+}
+
+.dataCardLabel {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.dataCardValue {
+    font-size: 36px;
+    font-weight: 900;
+    color: #ef4444;
+    line-height: 1;
+}
+
+.tagList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.tagAllergy {
+    background: rgba(220, 38, 38, 0.12);
+    color: #ef4444;
+    border: 1px solid rgba(220, 38, 38, 0.28);
+}
+
+.tagMed {
+    background: rgba(22, 163, 74, 0.12);
+    color: #4ade80;
+    border: 1px solid rgba(22, 163, 74, 0.28);
+}
+
+.tagCondition {
+    background: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.26);
+}
+
+.noData {
+    font-size: 12px;
+    color: #64748b;
+    font-style: italic;
+    margin: 0;
+}
+
+/* Section divider */
+.sectionDivider {
+    height: 1px;
+    background: var(--color-border);
+    margin: 4px 20px 0;
+}
+
+/* Audit footer */
+.auditFooter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px 14px;
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+}
+
+.auditDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #22c55e;
+    flex-shrink: 0;
+}
+
+/* Patient age badge (inline) */
+.patientAge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(37, 99, 235, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(37, 99, 235, 0.28);
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+/* Emergency contacts panel */
+.emContactsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 20px 20px;
+}
+
+.emContactsTitle {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-tertiary);
+    padding-top: 4px;
+}
+
+.emContactsList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.emContactCard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 13px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: 11px;
+    transition: border-color 0.15s;
+}
+
+.emContactCard:hover {
+    border-color: rgba(37, 99, 235, 0.35);
+}
+
+.emContactAvatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+}
+
+.emContactInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.emContactName {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.emContactMeta {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+}
+
+.emContactCall {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 13px;
+    background: rgba(22, 163, 74, 0.14);
+    color: #4ade80;
+    border: 1px solid rgba(22, 163, 74, 0.28);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.emContactCall:hover {
+    background: rgba(22, 163, 74, 0.28);
+    border-color: rgba(22, 163, 74, 0.5);
+}

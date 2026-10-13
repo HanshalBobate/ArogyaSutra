@@ -1,0 +1,121 @@
+// ============================================================
+// POST /api/profile/update
+// Updates patient or doctor profile attributes in Cognito.
+// Runs server-side so AdminUpdateUserAttributes credentials work.
+// ============================================================
+
+import { NextRequest, NextResponse } from "next/server";
+import * as cognito from "../../../../lib/aws/cognito";
+import * as dynamodb from "../../../../lib/aws/dynamodb";
+
+export async function POST(req: NextRequest) {
+    try {
+        const body = await req.json();
+        const { userId, role, updates } = body as {
+            userId: string;
+            role: "patient" | "doctor";
+            updates: Record<string, string>;
+        };
+
+        if (!userId || !role || !updates) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        if (role === "patient") {
+            // Patients are NOT allowed to update BP or temperature (doctor-only fields)
+            if (updates.bpSystolic || updates.bpDiastolic || updates.temperature) {
+                return NextResponse.json(
+                    { error: "BP and Temperature can only be updated by a doctor" },
+                    { status: 403 }
+                );
+            }
+
+            // NOTE: dateOfBirth is NOT sent — birthdate is immutable in Cognito
+            await cognito.updatePatientAttributes(userId, {
+                fullName: updates.fullName,
+                phone: updates.phone,
+                gender: updates.gender,
+                language: updates.language,
+                height: updates.height,
+                weight: updates.weight,
+                bloodGroup: updates.bloodGroup,
+                city: updates.city,
+                state: updates.state,
+                pincode: updates.pincode,
+                line1: updates.line1,
+                allergies: updates.allergies,
+                criticalMeds: updates.criticalMeds,
+            });
+
+            // emergency contacts stored in DynamoDB (custom:emergency_contacts not in Cognito schema)
+            if (updates.emergencyContacts !== undefined) {
+                try {
+                    const contacts = JSON.parse(updates.emergencyContacts || "[]");
+                    await dynamodb.putEmergencyContacts(userId, contacts);
+                } catch {
+                    console.warn("[/api/profile/update] Failed to parse emergencyContacts JSON");
+                }
+            }
+
+            // emergency info (allergies, meds, visibility) stored in DynamoDB
+            if (updates.emergencyAllergies !== undefined || updates.emergencyCriticalMeds !== undefined ||
+                updates.emShowBloodGroup !== undefined || updates.emShowAllergies !== undefined ||
+                updates.emShowMeds !== undefined || updates.emShowContacts !== undefined) {
+                try {
+                    const toArr = (s: string) => s.split(",").map((x: string) => x.trim()).filter(Boolean);
+                    await dynamodb.putEmergencyInfo(userId, {
+                        ...(updates.emergencyAllergies !== undefined && { allergies: toArr(updates.emergencyAllergies) }),
+                        ...(updates.emergencyCriticalMeds !== undefined && { criticalMeds: toArr(updates.emergencyCriticalMeds) }),
+                        ...(updates.emShowBloodGroup !== undefined && { showBloodGroup: updates.emShowBloodGroup === "true" }),
+                        ...(updates.emShowAllergies !== undefined && { showAllergies: updates.emShowAllergies === "true" }),
+                        ...(updates.emShowMeds !== undefined && { showMeds: updates.emShowMeds === "true" }),
+                        ...(updates.emShowContacts !== undefined && { showContacts: updates.emShowContacts === "true" }),
+                    });
+                } catch (err) {
+                    console.warn("[/api/profile/update] Failed to save emergency info:", err);
+                }
+            }
+        } else if (role === "doctor") {
+            // When a doctor updates a *patient's* vitals and health info
+            if (updates.targetPatientId) {
+                await cognito.updatePatientAttributes(updates.targetPatientId, {
+                    bpSystolic: updates.bpSystolic,
+                    bpDiastolic: updates.bpDiastolic,
+                    height: updates.height,
+                    weight: updates.weight,
+                    allergies: updates.allergies,
+                    criticalMeds: updates.criticalMeds,
+                });
+            } else {
+                // Doctor updating their own profile
+                const doctorAttrs: { Name: string; Value: string }[] = [];
+                if (updates.fullName) doctorAttrs.push({ Name: "name", Value: updates.fullName });
+                if (updates.phone) doctorAttrs.push({ Name: "phone_number", Value: updates.phone });
+                if (updates.institution) doctorAttrs.push({ Name: "custom:institution", Value: updates.institution });
+                if (updates.designation) doctorAttrs.push({ Name: "custom:designation", Value: updates.designation });
+
+                if (doctorAttrs.length > 0) {
+                    const { AdminUpdateUserAttributesCommand } = await import("@aws-sdk/client-cognito-identity-provider");
+                    const { CognitoIdentityProviderClient } = await import("@aws-sdk/client-cognito-identity-provider");
+                    const creds = process.env.APP_AWS_ACCESS_KEY_ID && process.env.APP_AWS_SECRET_ACCESS_KEY
+                        ? { credentials: { accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID, secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY } }
+                        : {};
+                    const client = new CognitoIdentityProviderClient({ region: process.env.NEXT_PUBLIC_AWS_REGION || "ap-south-1", ...creds });
+                    await client.send(new AdminUpdateUserAttributesCommand({
+                        UserPoolId: process.env.NEXT_PUBLIC_COGNITO_DOCTOR_POOL_ID!,
+                        Username: userId,
+                        UserAttributes: doctorAttrs,
+                    }));
+                }
+            }
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (err) {
+        console.error("[/api/profile/update]", err);
+        return NextResponse.json(
+            { error: (err as Error).message || "Failed to update profile" },
+            { status: 500 }
+        );
+    }
+}

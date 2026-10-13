@@ -1,0 +1,63 @@
+SYNTHETIC FILE: rahul_hba1c_lipid_panel.jpg
+================================================================
+INSTRUCTIONS TO CREATE THIS FILE:
+- Photograph or scan of a printed lab report on letterhead
+- Professional clinical lab report format
+
+CONTENT FOR THE LAB REPORT:
+================================================================
+
+METROPOLIS HEALTHCARE LTD.
+Accredited by NABL (M-0553)
+Branch: Andheri West, Mumbai - 400058
+Phone: 022-49898989
+
+LAB REPORT
+
+Patient Name : Rahul Sharma
+Age / Sex    : 45 years / Male
+Ref. Doctor  : Dr. Vikram Mehta
+Sample ID    : MPL-2026-789456
+Sample Date  : 05-Sep-2026, 08:15 AM (Fasting)
+Report Date  : 06-Sep-2026
+
+─────────────────────────────────────────────────────────────
+TEST                    RESULT      UNIT       REFERENCE RANGE
+─────────────────────────────────────────────────────────────
+
+GLYCATED HEMOGLOBIN (HbA1c)
+HbA1c                  7.8 (H)     %          4.0 – 5.6
+Est. Avg Glucose       177         mg/dL      —
+
+FASTING BLOOD SUGAR
+Fasting Glucose        168 (H)     mg/dL      70 – 100
+
+LIPID PROFILE
+Total Cholesterol      242 (H)     mg/dL      < 200
+Triglycerides          198 (H)     mg/dL      < 150
+HDL Cholesterol        38 (L)      mg/dL      > 40
+LDL Cholesterol        156 (H)     mg/dL      < 100
+VLDL Cholesterol       39.6        mg/dL      < 30
+Total Chol/HDL Ratio   6.37 (H)    —          < 4.5
+
+RENAL FUNCTION
+Serum Creatinine       1.1         mg/dL      0.7 – 1.3
+Blood Urea            32          mg/dL      15 – 40
+eGFR                   78          mL/min     > 90
+
+LIVER FUNCTION
+SGOT (AST)             34          U/L        0 – 40
+SGPT (ALT)             42 (H)     U/L        0 – 40
+
+─────────────────────────────────────────────────────────────
+(H) = High   (L) = Low
+
+Interpretation:
+- HbA1c 7.8% indicates suboptimal glycemic control (target < 7.0%)
+- Dyslipidemia with elevated LDL and triglycerides
+- Renal function borderline — monitor eGFR
+- Mild transaminitis (SGPT) — rule out fatty liver
+
+Verified by: Dr. Sanjay Kulkarni, MD (Pathology)
+Digitally signed report.
+================================================================

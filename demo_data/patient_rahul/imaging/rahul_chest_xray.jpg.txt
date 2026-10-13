@@ -1,0 +1,41 @@
+SYNTHETIC FILE: rahul_chest_xray.jpg
+================================================================
+INSTRUCTIONS TO CREATE THIS FILE:
+- Use a stock / royalty-free PA chest X-ray image
+- Should show a normal or near-normal chest radiograph
+- A real X-ray film photographed on a light box, or a DICOM render
+
+CONTENT / RADIOLOGY REPORT TO OVERLAY OR ACCOMPANY:
+================================================================
+
+APOLLO HOSPITALS, NAVI MUMBAI
+Department of Radiology
+
+CHEST X-RAY (PA VIEW)
+
+Patient Name : Rahul Sharma
+Age / Sex    : 45 years / Male
+Ref. Doctor  : Dr. Priya Nair (Cardiology)
+Study Date   : 25-Jul-2026
+Accession    : RAD-APL-2026-44521
+
+FINDINGS:
+- Heart size: Upper limit of normal (CT ratio ~0.48)
+- Left ventricular configuration — mild prominence of LV contour
+- Lung fields: Clear bilaterally. No infiltrates, effusion, or mass.
+- Costophrenic angles: Sharp bilaterally.
+- Mediastinum: Midline, unremarkable.
+- Bony thorax: No fractures or lytic lesions.
+- Trachea: Central.
+
+IMPRESSION:
+- Borderline cardiomegaly with LV prominence — correlate with
+  echocardiography and clinical findings (hypertensive heart disease?)
+- Lungs clear.
+
+Reported by: Dr. Anil Deshmukh, MD (Radiology)
+================================================================
+VISUAL DESCRIPTION FOR IMAGE CREATION:
+The X-ray should show a frontal PA chest view with a slightly
+enlarged cardiac silhouette. The lungs should be clear and black.
+The ribs and diaphragm should be clearly visible.
